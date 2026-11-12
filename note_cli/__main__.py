@@ -13,6 +13,16 @@ def add_note(text):
     (NOTES_DIR / note_hash).write_bytes(content)
     print(note_hash)
 
+def delete_note(note_hash):
+    if len(note_hash) != 64 or any(c not in "0123456789abcdef" for c in note_hash):
+        raise SystemExit("Invalid note hash")
+
+    try:
+        (NOTES_DIR / note_hash).unlink()
+    except FileNotFoundError:
+        raise SystemExit("Note not found")
+
+    print(f"Deleted {note_hash}")
 
 def main():
     parser = argparse.ArgumentParser(prog="note")
@@ -21,10 +31,14 @@ def main():
     add = commands.add_parser("add", help="Save a note")
     add.add_argument("text")
 
+    delete = commands.add_parser("delete", help="Delete a note")
+    delete.add_argument("note_hash")
+
     args = parser.parse_args()
     if args.command == "add":
         add_note(args.text)
-
+    elif args.command == "delete":
+        delete_note(args.note_hash)
 
 if __name__ == "__main__":
     main()
